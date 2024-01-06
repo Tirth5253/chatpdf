@@ -1,9 +1,4 @@
-import {
-  Pinecone,
-  Vector,
-  utils as PineconeUtils,
-  PineconeRecord,
-} from "@pinecone-database/pinecone";
+import { Pinecone, PineconeRecord } from "@pinecone-database/pinecone";
 import { downloadFromS3 } from "./s3-server";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import md5 from "md5";
@@ -14,16 +9,11 @@ import {
 import { getEmbeddings } from "./embeddings";
 import { convertToAscii } from "./utils";
 
-let pinecone: Pinecone | null = null;
-
 export const getPineconeClient = () => {
-  if (!pinecone) {
-    pinecone = new Pinecone({
-      environment: process.env.PINECONE_ENVIRONMENT!,
-      apiKey: process.env.PINECONE_API_KEY!,
-    });
-  }
-  return pinecone;
+  return new Pinecone({
+    environment: process.env.PINECONE_ENVIRONMENT!,
+    apiKey: process.env.PINECONE_API_KEY!,
+  });
 };
 
 type PDFPage = {
@@ -52,7 +42,7 @@ export async function loadS3IntoPinecone(fileKey: string) {
 
   // 4. upload to pinecone
   const client = await getPineconeClient();
-  const pineconeIndex = await client.index("pdf-insight");
+  const pineconeIndex = await client.index("chatpdf");
   const namespace = pineconeIndex.namespace(convertToAscii(fileKey));
 
   console.log("inserting vectors into pinecone");
